@@ -1,0 +1,48 @@
+---
+
+- name: Stop and Disable Firewalld
+  when: ansible_os_family == "RedHat"
+  systemd:
+     name: firewalld
+     daemon_reload: no
+     state: stopped
+     enabled: no
+  tags:
+    - nginx
+
+# - name: Create /etc/ssl/nginx
+#   shell: mkdir -p /etc/ssl/nginx
+#   register: task_result
+#   until: task_result.rc == 0
+#   retries: 1
+#   delay: 1
+#   args:
+#     warn: false
+
+- name: Install NginxPlus
+  include_tasks: pkg.yml
+  tags:
+    - nginx
+
+
+# Should be improved with templates...
+- name: Copy config to /etc/nginx
+  shell: cp /vagrant/configs/nginx.conf /etc/nginx
+  register: task_result
+  until: task_result.rc == 0
+  retries: 1
+  delay: 1
+  args:
+    warn: false
+  tags:
+    - nginx
+
+- name: Enable and restart Nginx
+  systemd:
+     name: nginx
+     daemon_reload: yes
+     state: restarted
+     enabled: yes
+  register: started_nginx
+  tags:
+    - nginx

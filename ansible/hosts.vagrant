@@ -1,0 +1,10 @@
+[loadbalancers]
+loadbalancer ansible_ssh_host=10.10.10.10 my_host_alias=loadbalancer
+
+[masters]
+master1 ansible_ssh_host=10.10.10.11 my_host_alias=master1
+master2 ansible_ssh_host=10.10.10.12 my_host_alias=master2
+master3 ansible_ssh_host=10.10.10.13 my_host_alias=master3
+
+[workers]
+worker1 ansible_ssh_host=10.10.10.14 my_host_alias=worker1

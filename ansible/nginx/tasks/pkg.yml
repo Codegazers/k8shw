@@ -1,0 +1,59 @@
+---
+   
+- name: apt | Install apt-transport-https
+  when: ansible_os_family == "Debian"
+  apt:
+    name: "apt-transport-https"
+    state: present
+  tags:
+    - Nginx
+
+- name: apt | Install lsb-release
+  when: ansible_os_family == "Debian"
+  apt:
+    name: "lsb-release"
+    state: present
+  tags:
+    - Nginx
+
+- name: apt | Install ca-certificates
+  when: ansible_os_family == "Debian"
+  apt:
+    name: "ca-certificates"
+    state: present
+  tags:
+    - Nginx
+
+- name: apt | Install Nginx (Debian/Ubuntu)
+  when: ansible_os_family == "Debian"
+  apt:
+    update_cache: yes
+    name: "nginx"
+    state: present
+    force: yes
+  tags:
+    - Nginx
+
+- name: apt | Hold Nginx version
+  when: ansible_os_family == "Debian"
+  dpkg_selections:
+    name: nginx
+    selection: hold
+  tags:
+    - Nginx
+
+- name: rpm | Install ca-certificates
+  when: ansible_os_family == "RedHat"
+  yum:
+    name: ca-certificates
+    state: present
+  tags:
+    - Nginx
+
+- name: rpm | Install Nginx
+  when: ansible_os_family == "RedHat"
+  yum:
+    name: nginx
+    state: present
+  tags:
+    - Nginx

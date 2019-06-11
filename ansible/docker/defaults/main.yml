@@ -1,0 +1,11 @@
+---
+docker_users: ['vagrant']
+
+# Docker Engine
+docker_version: "5:18.09.0~3-0~ubuntu-xenial" # For Ubuntu
+#docker_version: "docker-ee-stable-18.09" # For RedHat
+
+systemd_dir: /lib/systemd/system
+
+system_env_dir: /etc/sysconfig
+
