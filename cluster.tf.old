@@ -1,0 +1,110 @@
+provider "libvirt" {
+  uri = "qemu:///system"
+}
+
+#provider "libvirt" {
+#  alias = "server2"
+#  uri   = "qemu+ssh://root@192.168.100.10/system"
+#}
+variable "loadbalancers" {
+  type = "list"
+  default = ["1"]
+}
+
+variable "managers" {
+  type = "list"
+  default = ["1"]
+}
+
+variable "workers" {
+  type = "list"
+  default = ["1"]
+}
+
+resource "libvirt_pool" "ubuntu" {
+  name = "ubuntu"
+  type = "dir"
+  path = "/tmp/terraform-provider-libvirt-pool-ubuntu"
+}
+
+#data "template_file" "network_config" {
+#  template = "${file("${path.module}/network_config.cfg")}"
+#}
+
+resource "libvirt_volume" "bionic-server" {
+  
+  name = "bionic-server.img"
+  pool = "default"
+  #pool   = "${libvirt_pool.ubuntu.name}"
+  source = "https://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64.img"
+  format = "raw"
+}
+
+resource "libvirt_cloudinit_disk" "commoninit" {
+  name           = "commoninit.iso"
+  user_data      = "${data.template_file.user_data.rendered}"
+#  network_config = "${data.template_file.network_config.rendered}"
+  pool           = "${libvirt_pool.ubuntu.name}"
+}
+
+data "template_file" "user_data" {
+  template = "${file("${path.module}/cloud_init.cfg")}"
+}
+
+#LOADBALANCERS
+resource "libvirt_domain" "loadbalancer" {
+  name   = "lb"
+  memory = "512"
+  vcpu   = 1
+
+  network_interface {
+    network_name = "default"
+  }
+
+  disk {
+    volume_id = "${libvirt_volume.bionic-server.id}"
+  }
+
+  cloudinit = "${libvirt_cloudinit_disk.commoninit.id}"
+
+  console {
+    type = "pty"
+    target_type = "serial"
+    target_port = "0"
+  }
+
+  graphics {
+    type = "spice"
+    listen_type = "address"
+    autoport = true
+  }
+}
+
+#resource "libvirt_volume" "volume" {
+#  name           = "volume-${count.index}"
+#  base_volume_id = "${libvirt_volume.os_image.id}"
+#  count          = 4
+#}
+#
+#resource "libvirt_domain" "domain" {
+#  name = "domain-${count.index}"
+#
+#  disk {
+#    volume_id = "${element(libvirt_volume.volume.*.id, count.index)}"
+#  }
+#
+#  network_interface {
+#    network_name   = "default"
+#    wait_for_lease = true
+#  }
+#
+#  count = 4
+#}
+#
+#output "ips" {
+#  value = "${libvirt_domain.domain.*.network_interface.0.addresses}"
+#}
+
+#output "ip" {
+#  value = "${libvirt_domain.loadbalancer.network_interface.0.addresses.0}"
+#}
