@@ -1,3 +1,5 @@
 .vagrant
 keys/provision
 keys/provision.pub
+.terraform
+*.tfstate*
